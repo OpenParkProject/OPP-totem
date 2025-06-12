@@ -1,0 +1,13 @@
+[Unit]
+Description=OpenParkClient App
+After=network.target
+
+[Service]
+ExecStart=${CLIENT_EXECUTABLE_NAME} --fullscreen
+WorkingDirectory=${CLIENT_EXECUTABLE_DIR}
+Restart=always
+User=${USER_NAME}
+Environment=DISPLAY=:0
+
+[Install]
+WantedBy=graphical.target

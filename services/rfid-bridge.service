@@ -1,0 +1,11 @@
+[Unit]
+Description=RFID Bridge Service
+After=network.target
+[Service]
+ExecStart=venv/bin/python ${RFID_BRIDGE_EXECUTABLE_NAME}
+WorkingDirectory=${RFID_BRIDGE_EXECUTABLE_DIR}
+Restart=always
+User=${USER_NAME}
+Environment=DISPLAY=:0
+[Install]
+WantedBy=multi-user.target
