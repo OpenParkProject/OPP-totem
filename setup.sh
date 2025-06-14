@@ -54,14 +54,19 @@ sudo cp -f services/$CLIENT_SERVICE_NAME /etc/systemd/system/
 sudo cp -f services/$RFID_BRIDGE_SERVICE_NAME /etc/systemd/system/
 
 # Substitute environment variables in service files
-sudo envsubst < /etc/systemd/system/$CLIENT_SERVICE_NAME > /etc/systemd/system/$CLIENT_SERVICE_NAME
-sudo envsubst < /etc/systemd/system/$RFID_BRIDGE_SERVICE_NAME > /etc/systemd/system/$RFID_BRIDGE_SERVICE_NAME
+echo "Creating systemd service files..."
+envsubst < services/$CLIENT_SERVICE_NAME > /tmp/$CLIENT_SERVICE_NAME
+envsubst < services/$RFID_BRIDGE_SERVICE_NAME > /tmp/$RFID_BRIDGE_SERVICE_NAME
+sudo cp /tmp/$CLIENT_SERVICE_NAME /etc/systemd/system/
+sudo cp /tmp/$RFID_BRIDGE_SERVICE_NAME /etc/systemd/system/
 
+# Clean up temporary files
+rm /tmp/$CLIENT_SERVICE_NAME /tmp/$RFID_BRIDGE_SERVICE_NAME
 echo "Enabling and starting services..."
 sudo systemctl daemon-reload
-sudo systemctl enable $CLIENT_SERVICE_NAME.service
-sudo systemctl enable $RFID_BRIDGE_SERVICE_NAME.service
-sudo systemctl start $CLIENT_SERVICE_NAME.service
-sudo systemctl start $RFID_BRIDGE_SERVICE_NAME.service
+sudo systemctl enable $CLIENT_SERVICE_NAME
+sudo systemctl enable $RFID_BRIDGE_SERVICE_NAME
+sudo systemctl start $CLIENT_SERVICE_NAME
+sudo systemctl start $RFID_BRIDGE_SERVICE_NAME
 
 echo "Open Park Project totem configuration completed successfully!"

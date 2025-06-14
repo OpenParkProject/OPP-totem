@@ -3,7 +3,7 @@ Description=OpenParkClient App
 After=network.target
 
 [Service]
-ExecStart=${CLIENT_EXECUTABLE_NAME} --fullscreen
+ExecStart=${CLIENT_EXECUTABLE_DIR}/${CLIENT_EXECUTABLE_NAME} --fullscreen
 WorkingDirectory=${CLIENT_EXECUTABLE_DIR}
 Restart=always
 User=${USER_NAME}
