@@ -1,0 +1,12 @@
+[Unit]
+Description=OpenPark Web Kiosk
+After=network.target
+
+[Service]
+ExecStart=chromium-browser --kiosk http://openpark.com
+Restart=always
+User=${USER_NAME}
+Environment=DISPLAY=:0
+
+[Install]
+WantedBy=graphical.target

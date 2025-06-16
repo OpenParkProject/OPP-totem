@@ -3,14 +3,16 @@
 set -e
 set -a
 
-DEPLOY_CLIENT=true
+DEPLOY_APP=true
+WEB_KIOSK_MODE=false
 
 # If x86_64 deploy Linux client app and RFID bridge
 # Else, deploy only RFID bridge, app is not currently available for other architectures
 # You can access the web client at http://openpark.com
 if [[ "$(uname -m)" != "x86_64" ]]; then
-    DEPLOY_CLIENT=false
-    echo "Open Park Project client app is not available for this architecture. Only RFID bridge will be deployed."
+    DEPLOY_APP=false
+    WEB_KIOSK_MODE=true
+    echo "Open Park Project client app is not available for this architecture. Web Browser and RFID bridge will be deployed."
 fi
 
 CLIENT_SERVICE_NAME="opp-client.service"
@@ -21,6 +23,8 @@ CLIENT_EXECUTABLE_NAME="openpark"
 RFID_BRIDGE_SERVICE_NAME="rfid-bridge.service"
 RFID_BRIDGE_EXECUTABLE_DIR=$HOME/rfid-bridge/
 RFID_BRIDGE_EXECUTABLE_NAME="rfid-bridge.py"
+
+WEB_KIOSK_SERVICE_NAME="opp-web-kiosk.service"
 
 echo "Open Park Project totem configuration started"
 
@@ -36,7 +40,7 @@ if [ -d "$RFID_BRIDGE_EXECUTABLE_DIR" ]; then
     rm -rf $RFID_BRIDGE_EXECUTABLE_DIR
 fi
 
-if [ $DEPLOY_CLIENT = true ]; then
+if [ $DEPLOY_APP = true ]; then
   echo "Fetching latest client app..."
   # Download the latest OPP client frontend
   OPP_CLIENT_URL_BASE="https://api.github.com/repos/OpenParkProject/OPP-frontend/releases/latest"
@@ -65,20 +69,29 @@ echo "Creating systemd service files..."
 # Substitute environment variables in service files
 envsubst < services/$RFID_BRIDGE_SERVICE_NAME > /tmp/$RFID_BRIDGE_SERVICE_NAME
 sudo cp /tmp/$RFID_BRIDGE_SERVICE_NAME /etc/systemd/system/
-if [ $DEPLOY_CLIENT = true ]; then
+if [ $DEPLOY_APP = true ]; then
   envsubst < services/$CLIENT_SERVICE_NAME > /tmp/$CLIENT_SERVICE_NAME
   sudo cp /tmp/$CLIENT_SERVICE_NAME /etc/systemd/system/
 fi
+if [ $WEB_KIOSK_MODE = true ]; then
+  envsubst < services/$WEB_KIOSK_SERVICE_NAME > /tmp/$WEB_KIOSK_SERVICE_NAME
+  sudo cp /tmp/$WEB_KIOSK_SERVICE_NAME /etc/systemd/system/
+fi
 
 # Clean up temporary files
-rm /tmp/$CLIENT_SERVICE_NAME /tmp/$RFID_BRIDGE_SERVICE_NAME
+rm -f /tmp/$CLIENT_SERVICE_NAME /tmp/$RFID_BRIDGE_SERVICE_NAME /tmp/$WEB_KIOSK_SERVICE_NAME
+
 echo "Enabling and starting services..."
 sudo systemctl daemon-reload
 sudo systemctl enable $RFID_BRIDGE_SERVICE_NAME
 sudo systemctl start $RFID_BRIDGE_SERVICE_NAME
-if [ $DEPLOY_CLIENT = true ]; then
+if [ $DEPLOY_APP = true ]; then
   sudo systemctl enable $CLIENT_SERVICE_NAME
   sudo systemctl start $CLIENT_SERVICE_NAME
+fi
+if [ $WEB_KIOSK_MODE = true ]; then
+  sudo systemctl enable $WEB_KIOSK_SERVICE_NAME
+  sudo systemctl start $WEB_KIOSK_SERVICE_NAME
 fi
 
 echo "Open Park Project totem configuration completed successfully!"
