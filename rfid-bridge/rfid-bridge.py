@@ -3,7 +3,7 @@ import time
 import asyncio
 from websockets.asyncio.server import serve
 
-debug = True
+debug = False
 
 if (not debug):
     import RPi.GPIO as GPIO
